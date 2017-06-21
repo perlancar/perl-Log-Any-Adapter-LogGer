@@ -58,7 +58,8 @@ for my $method (Log::Any->detection_methods()) {
         $method,
         sub {
             my $self = shift;
-            return $logging_levels{$method} <
+            (my $meth = $method) =~ s/^is_//;
+            return $logging_levels{$meth} <
                 $logging_levels{ $self->{min_level} };
         });
 }
