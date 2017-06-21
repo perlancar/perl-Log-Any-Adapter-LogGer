@@ -25,22 +25,8 @@ for my $i (0..@logging_methods-1) {
 # some common typos
 $logging_levels{warn} = $logging_levels{warning};
 
-sub _min_level {
-    my $self = shift;
-
-    return $ENV{LOG_LEVEL}
-        if $ENV{LOG_LEVEL} && defined $logging_levels{$ENV{LOG_LEVEL}};
-    return 'trace' if $ENV{TRACE};
-    return 'debug' if $ENV{DEBUG};
-    return 'info'  if $ENV{VERBOSE};
-    return 'error' if $ENV{QUIET};
-    $self->{default_level};
-}
-
 sub init {
     my ($self) = @_;
-    $self->{default_level} //= 'warning';
-    $self->{min_level} //= $self->_min_level;
 }
 
 for my $method (Log::Any->logging_methods()) {
@@ -48,9 +34,6 @@ for my $method (Log::Any->logging_methods()) {
         $method,
         sub {
             my ($self, $msg) = @_;
-            return if $logging_levels{$method} <
-                $logging_levels{$self->{min_level}};
-
             my $cat = $self->{category};
             unless ($LogGer_Objects{$cat}) {
                 $LogGer_Objects{$cat} =
@@ -69,10 +52,7 @@ for my $method (Log::Any->detection_methods()) {
     my $level = $method; $level =~ s/^is_//;
     make_method(
         $method,
-        sub {
-            my $self = shift;
-            $logging_levels{$level} >= $logging_levels{$self->{min_level}};
-        }
+        sub {1},
     );
 }
 
@@ -88,22 +68,6 @@ for my $method (Log::Any->detection_methods()) {
 
 
 =head1 DESCRIPTION
-
-
-=head1 ENVIRONMENT
-
-=head2 LOG_LEVEL => str
-
-=head2 QUIET => bool
-
-=head2 VERBOSE => bool
-
-=head2 DEBUG => bool
-
-=head2 TRACE => bool
-
-These environment variables can set the default for C<min_level>. See
-documentation about C<min_level> for more details.
 
 
 =head1 SEE ALSO
