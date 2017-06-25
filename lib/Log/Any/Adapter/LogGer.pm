@@ -37,10 +37,10 @@ for my $method (Log::Any->logging_methods()) {
             my $cat = $self->{category};
             unless ($LogGer_Objects{$cat}) {
                 $LogGer_Objects{$cat} =
-                    Log::ger::setup_object(category => $cat);
+                    Log::ger->get_logger(category => $cat);
             }
-            my $lg_method = "log_$method";
-            $lg_method = "log_warn" if $lg_method eq 'log_warning';
+            my $lg_method = $method;
+            $lg_method = "warn" if $lg_method eq 'warning';
             #if ($LogGer_Objects{$cat}->can($lg_method)) {
             $LogGer_Objects{$cat}->$lg_method($msg);
             #}
